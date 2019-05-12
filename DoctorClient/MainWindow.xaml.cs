@@ -24,7 +24,7 @@ namespace DoctorClient
     {
 
         private IRESTService _apiService;
-        List<CheckIn> checkIns;
+        //List<CheckIn> checkIns;
 
         private CheckInTimeTableService _timeTableService;
 
@@ -114,7 +114,7 @@ namespace DoctorClient
         {
             var btn = sender as Button;
             var selectedItem = btn.DataContext as CheckIn;
-            Console.WriteLine(selectedItem.Description);
+            //Console.WriteLine(selectedItem.Description);
             if (selectedItem.Id == LivePatientsListBox.ItemsSource.Cast<CheckIn>().First().Id)
                 new CheckInViewer(_apiService, selectedItem, true).ShowDialog();
             else

@@ -70,7 +70,7 @@ namespace DoctorClient
                     Console.WriteLine(await ex.GetResponseStringAsync());
                 }
             }
-            else
+            else if (string.IsNullOrEmpty(DescriptionTextBox.Text))
             {
                 ErrorTextBox.Text = "A final note is required before finishing!";
             }

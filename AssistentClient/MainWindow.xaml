@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AssistantClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Assistant Client" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
@@ -18,10 +18,9 @@
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="4" VerticalAlignment="Center">
             <Button Content="Add Patient" Margin="5" Padding="5" Click="AddPatientButton_Click"/>
             <Button Content="Add Appointment" Margin="5" Padding="5" Click="AddAppointmentButton_Click"/>
-            <Button Content="Add Check-In" Margin="5" Padding="5"/>
         </StackPanel>
-        <Label Grid.Column="1" Grid.Row="0" FontSize="25" FontWeight="Bold" FontFamily="Verdana" VerticalAlignment="Center" HorizontalAlignment="Center">Currently waiting patients</Label>
-        <ItemsControl x:Name="LivePatientsListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" AlternationCount="100">
+        <Label Grid.Column="1" Grid.Row="0" FontSize="25" FontWeight="Bold" FontFamily="Verdana" VerticalAlignment="Center" HorizontalAlignment="Center" Content="Timetable"/>
+        <ItemsControl x:Name="LivePatientsListBox" Grid.Column="1" Grid.Row="1" HorizontalContentAlignment="Stretch" Margin="10, 0, 10, 10" AlternationCount="100">
             <ItemsControl.Resources>
                 <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             </ItemsControl.Resources>
