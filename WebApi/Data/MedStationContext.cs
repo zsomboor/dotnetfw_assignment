@@ -21,7 +21,6 @@ namespace WebApi.Data
 
         public DbSet<Patient> Patients { get; set; }
         public DbSet<CheckIn> CheckIns { get; set; }
-        public DbSet<Medicine> Medicines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

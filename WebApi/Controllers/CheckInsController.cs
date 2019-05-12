@@ -17,9 +17,9 @@ namespace WebApi.Controllers
     [RoutePrefix("api/checkins")]
     public class CheckInsController : ApiController
     {
-        // GET: api/CheckIns
         private MedStationContext db = new MedStationContext();
 
+        // GET: api/checkins
         [HttpGet(), Route("")]
         public async Task<IHttpActionResult> Get(DateTime? after = null, DateTime? before = null, int? previousId = null, bool isDone = false)
         {
@@ -30,28 +30,17 @@ namespace WebApi.Controllers
             return Ok(Mapper.Map<List<CheckInDTO>>(checkIns));
         }
 
+        // GET: api/checkins/id
         [HttpGet(), Route("{id}")]
         public async Task<IHttpActionResult> Get(long id)
         {
             return Ok(await db.CheckIns.FirstOrDefaultAsync(x => x.Id == id));
         }
 
-        // POST: api/CheckIns
-        public void Post([FromBody]string value)
-        {
-        }
-
-
-        /*
-         *  TODO: Rethink this, probably create a different entity such as a medical history entry, 
-         *  where you basically have the date, a text description of the health issue related, and whatever information
-         *  It would be mandatory to have a post request to that, which would set the related checkin to "done".
-         */
-        // PUT: api/CheckIns/5
+        // POST: api/CheckIns/id/is-done
         [HttpPost(), Route("{id}/is-done")]
         public async Task<IHttpActionResult> FinishCheckIn(long id, HistoryEntryDTO historyEntryDTO)
         {
-            //TODO: Add the checkin to the patient as a history entry in some sort of way. Done?
             CheckIn checkIn = await db.CheckIns.Include(x => x.Patient).Include(x => x.Patient.MedicalHistory).FirstOrDefaultAsync(x => x.Id == id);
             checkIn.IsDone = true;
             HistoryEntry historyEntry = new HistoryEntry()
@@ -69,22 +58,6 @@ namespace WebApi.Controllers
                 checkIn.Patient.MedicalHistory.Add(historyEntry);
             await db.SaveChangesAsync();
             return Ok();
-        }
-
-        [HttpPost(), Route("{id}/arrival")]
-        public async Task<IHttpActionResult> PutArrival(long id)
-        {
-            CheckIn checkIn = await db.CheckIns.FirstOrDefaultAsync(x => x.Id == id);
-            if (!checkIn.IsAppointment)
-                return BadRequest();
-            checkIn.Arrival = DateTime.UtcNow;
-            await db.SaveChangesAsync();
-            return Ok(Mapper.Map<CheckInDTO>(checkIn));
-        }
-
-        // DELETE: api/CheckIns/5
-        public void Delete(int id)
-        {
         }
     }
 }

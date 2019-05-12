@@ -1,9 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using WebApi.Data;
 
 namespace WebApi
 {
@@ -18,6 +20,11 @@ namespace WebApi
 
             JsonSerializerSettings settings = config.Formatters.JsonFormatter.SerializerSettings;
             settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+
+            using(MedStationContext dbContext = new MedStationContext())
+            {
+                dbContext.Database.EnsureCreated();
+            }
             //IsoDateTimeConverter dateConverter = new IsoDateTimeConverter
             //{
             //    DateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm':'ss.fffffff'Z'"

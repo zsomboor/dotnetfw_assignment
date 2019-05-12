@@ -306,12 +306,10 @@
     <Compile Include="Controllers\CheckInsController.cs" />
     <Compile Include="Controllers\PatientsController.cs" />
     <Compile Include="Data\MedStationContext.cs" />
-    <Compile Include="DTO\AppointmentDTO.cs" />
     <Compile Include="DTO\CheckInDTO.cs" />
     <Compile Include="DTO\HistoryEntryDTO.cs" />
     <Compile Include="DTO\PatientBaseDTO.cs" />
     <Compile Include="DTO\PatientFilterDTO.cs" />
-    <Compile Include="DTO\UnappointedCheckInDTO.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -355,9 +353,7 @@
     <Compile Include="Models\HomeAddress.cs" />
     <Compile Include="Models\CheckIn.cs" />
     <Compile Include="Models\HistoryEntry.cs" />
-    <Compile Include="Models\Medicine.cs" />
     <Compile Include="Models\Patient.cs" />
-    <Compile Include="Models\SocialSecurityId.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,7 @@ namespace WebApi.Controllers
 
         MedStationContext db = new MedStationContext(); 
 
-        // GET: api/Patients
+        // GET: api/patients
         [HttpGet(), Route("")]
         public async Task<IHttpActionResult> Get([FromUri]PatientFilterDTO filter)
         {
@@ -41,7 +41,7 @@ namespace WebApi.Controllers
             return Ok(Mapper.Map<List<PatientBaseDTO>>(await query.ToListAsync()));
         }
 
-        // GET: api/Patients/5
+        // GET: api/patients/id
         [HttpGet(), Route("{id}")]
         public async Task<IHttpActionResult> Get(long id)
         {
@@ -51,7 +51,7 @@ namespace WebApi.Controllers
             return Ok(Mapper.Map<PatientBaseDTO>(patient));
         }
 
-        // GET: api/Patients/5
+        // GET: api/patients/id/medical-history
         [HttpGet(), Route("{id}/medical-history")]
         public async Task<IHttpActionResult> GetHistory(long id)
         {
@@ -63,47 +63,7 @@ namespace WebApi.Controllers
             return Ok(Mapper.Map<List<HistoryEntryDTO>>(patient.MedicalHistory ?? new List<HistoryEntry>()));
         }
 
-        // POST: api/Patients
-        [HttpPost(), Route("{id}/checkins")]
-        public async Task<IHttpActionResult> AddNewCheckIn(long id, CheckInDTO checkInDto)
-        {
-
-            Patient patient = await db.Patients.FirstOrDefaultAsync(x => x.Id == id);
-            CheckIn checkIn = new CheckIn();
-            checkIn.IsAppointment = checkInDto.IsAppointment;
-            checkIn.Arrival = DateTime.Now;
-            checkIn.AppointedTo = checkInDto.AppointedTo ?? checkIn.Arrival ;
-            checkIn.Description = checkInDto.Description;
-            if (patient.CheckIns == null)
-                patient.CheckIns = new List<CheckIn>() { checkIn };
-            else
-                patient.CheckIns.Add(checkIn);
-            await db.SaveChangesAsync();
-            return Ok(Mapper.Map<CheckInDTO>(checkIn));
-        }
-
-        [HttpPost(), Route("{id}/appointments")]
-        public async Task<IHttpActionResult> AddNewAppointment(long id, AppointmentDTO appointment)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-
-            Patient patient = await db.Patients.Include(x => x.CheckIns).FirstOrDefaultAsync(x => x.Id == id);
-            CheckIn checkIn = new CheckIn
-            {
-                IsAppointment = true,
-                Arrival = new DateTime(0),
-                AppointedTo = appointment.AppointedTo
-            };
-            if (patient.CheckIns == null)
-                patient.CheckIns = new List<CheckIn>() { checkIn };
-            else
-                patient.CheckIns.Add(checkIn);
-            await db.SaveChangesAsync();
-            return Ok(Mapper.Map<CheckInDTO>(checkIn));
-        }
-
+        // POST: api/patients
         [HttpPost(), Route("")]
         public async Task<IHttpActionResult> Post([FromBody]PatientBaseDTO payload)
         {
@@ -122,23 +82,32 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 Exception exception = ex;
-                while(exception.InnerException != null)
+                while (exception.InnerException != null)
                 {
                     exception = exception.InnerException;
                 }
                 return BadRequest(exception.Message);
             }
-            
+
         }
 
-        // PUT: api/Patients/5
-        public void Put(int id, [FromBody]string value)
+        // POST: api/patients/id/checkins
+        [HttpPost(), Route("{id}/checkins")]
+        public async Task<IHttpActionResult> AddNewCheckIn(long id, CheckInDTO checkInDto)
         {
-        }
 
-        // DELETE: api/Patients/5
-        public void Delete(int id)
-        {
+            Patient patient = await db.Patients.FirstOrDefaultAsync(x => x.Id == id);
+            CheckIn checkIn = new CheckIn();
+            checkIn.IsAppointment = checkInDto.IsAppointment;
+            checkIn.Arrival = DateTime.Now;
+            checkIn.AppointedTo = checkInDto.AppointedTo ?? checkIn.Arrival ;
+            checkIn.Description = checkInDto.Description;
+            if (patient.CheckIns == null)
+                patient.CheckIns = new List<CheckIn>() { checkIn };
+            else
+                patient.CheckIns.Add(checkIn);
+            await db.SaveChangesAsync();
+            return Ok(Mapper.Map<CheckInDTO>(checkIn));
         }
     }
 }
