@@ -37,7 +37,7 @@ namespace DataServices
             {
                 request = request.SetQueryParam(param);
             }
-            Console.WriteLine(request);
+            //Console.WriteLine(request);
             return await request.GetJsonAsync<T>();
         }
 

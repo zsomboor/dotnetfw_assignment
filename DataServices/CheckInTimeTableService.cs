@@ -39,7 +39,7 @@ namespace DataServices
             CheckIns = new List<CheckIn>();
             _apiService = apiService;
             _dataSyncService = new PollingDataSyncService<CheckIn>(5000, _apiService);
-            _dataSyncService.NewData += OnSuccessfulSync;
+            _dataSyncService.NewData += OnNewElementsFound;
             _dataSyncService.AlteredData += OnAlteredElementsFound;
             _timer = new Timer(5000);
             _timer.Elapsed += OnAppointmentSortRequest;
@@ -62,9 +62,18 @@ namespace DataServices
             _timer.Start();
         }
 
-        private void OnSuccessfulSync(object sender, DataSyncEventArgs<CheckIn> e)
+        /// <summary>
+        /// Stops database synchronization and order monitoring.
+        /// </summary>
+        public void Stop()
         {
-            List<CheckIn> newElements = e.NewAppointments.OrderBy(x => x.AppointedTo).ToList();
+            _timer.Stop();
+            _dataSyncService.Stop();
+        }
+
+        private void OnNewElementsFound(object sender, DataSyncEventArgs<CheckIn> e)
+        {
+            List<CheckIn> newElements = e.ChangedElements.OrderBy(x => x.AppointedTo).ToList();
             for(int i = 0; i < newElements.Count; i++)
             {
                 if (newElements[i].IsAppointment && newElements[i].AppointedTo.Value.CompareTo(DateTime.Now) <= 0)
@@ -76,7 +85,6 @@ namespace DataServices
                             CheckIn temp = newElements[i];
                             newElements.RemoveAt(i);
                             newElements.Insert(j, temp);
-                            //hasChanged = true;
                             break;
                         }
                     }
@@ -93,7 +101,6 @@ namespace DataServices
             foreach (var item in newElements)
             {
                 //Puts newly synchronized checkins that are earlier than the current last one in their right place.
-                //Also should probably order the NewAppointments list in some place by AppointedTo date.
                 if (CheckIns.Count > 1 && CheckIns.Last().AppointedTo.Value.CompareTo(item.AppointedTo.Value) > 0)
                 {
                     int targetIndex = CheckIns.Count - 1;
@@ -138,12 +145,13 @@ namespace DataServices
 
         private void OnAlteredElementsFound(object sender, DataSyncEventArgs<CheckIn> e)
         {
-            if(e.NewAppointments.Count > 0)
+            if(e.ChangedElements.Count > 0)
             {
-                foreach (var item in e.NewAppointments)
+                foreach (var item in e.ChangedElements)
                 {
-                    Console.WriteLine("Yay, this works!?");
-                    Console.WriteLine(item.Description);
+                    //Console.WriteLine("Yay, this works!?");
+                    //Console.WriteLine(item.Description);
+                    Console.WriteLine("Removing Element: " + item.Id);
                     CheckIns.Remove(CheckIns.Single(x => x.Id == item.Id));
                 }
                 Updated.Invoke(this, new EventArgs());

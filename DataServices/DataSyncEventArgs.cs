@@ -8,6 +8,6 @@ namespace DataServices
 {
     public class DataSyncEventArgs<T> : EventArgs
     {
-        public List<T> NewAppointments { get; set; }
+        public List<T> ChangedElements { get; set; }
     }
 }

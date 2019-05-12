@@ -17,7 +17,7 @@ namespace DataServices
         /// </summary>
         event EventHandler<DataSyncEventArgs<T>> NewData;
         /// <summary>
-        /// Occurs when already existing elements have been altered.
+        /// Occurs when already existing elements are changed or removed.
         /// </summary>
         event EventHandler<DataSyncEventArgs<T>> AlteredData;
         /// <summary>

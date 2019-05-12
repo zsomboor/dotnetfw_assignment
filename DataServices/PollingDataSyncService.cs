@@ -23,6 +23,9 @@ namespace DataServices
         /// Occurs when new elements are found.
         /// </summary>
         public event EventHandler<DataSyncEventArgs<T>> NewData;
+        /// <summary>
+        /// Occurs when already existing elements are changed or removed.
+        /// </summary>
         public event EventHandler<DataSyncEventArgs<T>> AlteredData;
 
         /// <summary>
@@ -73,12 +76,12 @@ namespace DataServices
             if(list.Count > 0)
             {
                 _repository.AddRange(list);
-                NewData?.Invoke(this, new DataSyncEventArgs<T>() { NewAppointments = list });
+                NewData?.Invoke(this, new DataSyncEventArgs<T>() { ChangedElements = list });
             }
-            foreach (T item in _repository.Cast<T>())
-            {
-                Console.WriteLine(item.GetSyncId());
-            }
+            //foreach (T item in _repository.Cast<T>())
+            //{
+            //    Console.WriteLine(item.GetSyncId());
+            //}
             _timer.Start();
         }
 
@@ -92,26 +95,30 @@ namespace DataServices
 
         private async void SyncWithDatabase(object sender, EventArgs e)
         {
-            //TODO: Implement another function that synchronizes finished appointments, fires a different "FinishedElements" event with same DataSyncEventArgs<T>.
-            //Same GetAllBetweenDatesAsync<T> method, with from as the minimum appointment time currently, and to as tomorrow, also send isDone = true
             var list = await _dataSyncDelegate(_apiService, _apiResourceUri, _repository.Count > 0  ? _repository.Max(x => x.GetSyncId()) : -1);
-            Console.WriteLine("Sync Call made");
+            //Console.WriteLine("Sync Call made");
             if (list.Count > 0)
             {
-                Console.WriteLine("More than 0 ({0}) elements returned", list.Count);
+                Console.WriteLine("More than 0 ({0}) new elements retrieved!", list.Count);
                 _repository.AddRange(list);
-                NewData?.Invoke(this, new DataSyncEventArgs<T>() { NewAppointments = list });
+                NewData?.Invoke(this, new DataSyncEventArgs<T>() { ChangedElements = list });
             }
+
+            //If there are no elements, nothing can change
             if (_repository.Count == 0)
                 return;
+
+
             var alteredList = await ItemsAlteredFetchFunc(_apiService, _apiResourceUri, _repository.Min(x => x.GetSyncDate()));
 
             if(alteredList.Count > 0)
             {
+                //This is needed because the minimum date might be lower than the first processed element's date due to appointments taking priority.
+                //Probably should be moved to an upper layer as this behaviour is CheckIn specific and this class is otherwise trying to be as generic as possible
                 List<T> notifyWithList = new List<T>();
                 foreach (var item in alteredList)
                 {
-                    Console.WriteLine(item.GetSyncId() + ": " + item.GetSyncDate());
+                    //Console.WriteLine(item.GetSyncId() + ": " + item.GetSyncDate());
                     T removable = _repository.SingleOrDefault(x => x.GetSyncId() == item.GetSyncId());
                     if (removable != null)
                     {
@@ -120,7 +127,7 @@ namespace DataServices
                     }
                 }
                 if(notifyWithList.Count > 0)
-                    AlteredData?.Invoke(this, new DataSyncEventArgs<T>() { NewAppointments = notifyWithList });
+                    AlteredData?.Invoke(this, new DataSyncEventArgs<T>() { ChangedElements = notifyWithList });
             }
         }
 
@@ -133,7 +140,7 @@ namespace DataServices
         /// <returns>List of new T elements, may be empty.</returns>
         private async Task<List<T>> DefaultDatabaseFetchFunc(IRESTService apiService, string resourceUri, int syncBy)
         {
-            Console.WriteLine("Sync by id: {0}", syncBy);
+            //Console.WriteLine("Sync by id: {0}", syncBy);
             DateTime today = DateTime.Now.Subtract(DateTime.Now.TimeOfDay);
             DateTime tomorrow = today.AddDays(1);
             return await apiService.GetAllBetweenDatesAsync<T>(resourceUri, today, tomorrow, syncBy > -1 ? syncBy : (int?)null);
@@ -142,7 +149,7 @@ namespace DataServices
 
         private async Task<List<T>> ItemsAlteredFetchFunc(IRESTService apiService, string resourceUri, DateTime syncByDate)
         {
-            Console.WriteLine("Syncing by date: {0}", syncByDate);
+            //Console.WriteLine("Syncing by date: {0}", syncByDate);
             DateTime today = DateTime.Now.Subtract(DateTime.Now.TimeOfDay);
             DateTime tomorrow = today.AddDays(1);
             return await apiService.GetAllBetweenDatesAsync<T>(resourceUri, syncByDate, tomorrow, null, true);
